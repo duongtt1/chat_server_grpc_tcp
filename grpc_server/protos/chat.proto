@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package ChatPackage;
+
+service ChatStream  {
+    rpc JoinRoom (JoinRoomReq) returns (JoinRoomRes) {}
+
+    rpc ChatStream(stream ClientMessage) returns (stream ServerMessage) {} 
+}
+
+message JoinRoomReq {
+    string username = 1;
+    string room     = 2;
+}
+
+message JoinRoomRes {
+    bool success    = 1;
+}
+
+message ClientMessage {
+    string message = 1; 
+}
+
+message ServerMessage {
+    string name = 1;
+    string channel = 2;
+    string payload = 3; 
+}
