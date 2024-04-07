@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol>
+    <datatypes>
+        <basic>
+            <!-- All type of stdint -->
+        </basic>
+        <usertype>
+            <enums>
+                <enum name="ReturnType" type="uint8_t">
+                    <element name="Ok" desc="Ok">0</element>
+                    <element name="Error" desc="Not_Ok">1</element>
+                    <element name="Invalid" desc="Invalid">2</element>
+                </enum>
+                <enum name="StreamDevice" type="uint8_t">
+                    <element name="Cam0" desc="Cam0">0</element>
+                    <element name="Screen" desc="Screen">1</element>
+                    <element name="Invalid" desc="Invalid">2</element>
+                </enum>
+            </enums>
+
+        </usertype>
+    </datatypes>
+    <behaviors>
+        <requests>
+            <req name="Chat" id="0x03" opcode="0x01">
+                <params num="1">
+                    <param name="name" type="string" />
+                    <param name="room" type="string" />
+                    <param name="msg" type="string" />
+                </params>
+                <returns num="1">
+                    <param name="success" type="bool"></param>
+                </returns>
+            </req>
+        </requests>
+    </behaviors>
+    <options>
+        <libs>
+            <lib type="std">iostream</lib>
+            <lib type="std">string</lib>
+            <lib type="c">stdint.h</lib>
+        </libs>
+        <files>
+            <file>interfaces/RequestBase.h</file>
+            <file>socket/tcp_socket.h</file>
+            <file>interfaces/ResponseBase.h</file>
+            <file>protocol_utils.h</file>
+        </files>
+        <namespaces>
+            <namespace>std</namespace>
+        </namespaces>
+    </options>
+</protocol>

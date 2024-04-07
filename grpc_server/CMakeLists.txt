@@ -40,7 +40,7 @@ target_link_libraries(chat_grpc_proto
 
 # Targets [async_](client|server)
 foreach(_target
-  client server pub)
+  server)
   add_executable(${_target} "${_target}.cc" "SubRedisThread.cc" "ChatStreamImpl.cc")
   target_link_libraries(${_target}
     chat_grpc_proto

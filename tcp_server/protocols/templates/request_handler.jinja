@@ -1,0 +1,23 @@
+#ifndef REQ_HANDLE_H
+#define REQ_HANDLE_H
+
+// Include library
+{% for lib in includes %}
+#include <{{ lib }}>
+{%- endfor %}
+{%- for f in files %}
+#include "{{ f }}"
+{%- endfor %}
+#include "types.h"
+{% for n in namespaces %}
+using namespace {{ n }};
+{%- endfor %}
+
+class RequestHandler final {
+public:
+{%- for req_name, req_id, req_opcode, params, returns in requests %}
+    static void Request{{req_name}}CallbackIpml(TCPSocket   *socket, {{req_name}}Body body);
+{%- endfor %}
+};
+
+#endif

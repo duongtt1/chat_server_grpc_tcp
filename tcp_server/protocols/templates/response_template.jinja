@@ -1,0 +1,61 @@
+#ifndef PROTOCOL_GENERATED_HPP
+#define PROTOCOL_GENERATED_HPP
+
+// Include library
+{% for lib in includes %}
+#include <{{ lib }}>
+{%- endfor %}
+{%- for f in files %}
+#include "{{ f }}"
+{%- endfor %}
+#include "request_handler.h"
+#include "types.h"
+{% for n in namespaces %}
+using namespace {{ n }};
+{%- endfor %}
+
+{%- for req_name, req_id, req_opcode, params, returns in requests %}
+class Response{{req_name}} : public ResponseBase {
+protected:
+    {{req_name}}Res body;
+public:
+    Response{{req_name}}( ) : ResponseBase( ) { }
+    ~Response{{req_name}}(){ }
+    // Serialize Response{{req_name}}
+    void serialize(std::vector<char>& buffer) const {
+        Serializer<uint8_t>::serialize(statusCode, buffer);
+        {% for param_name, param_type in returns %}
+        {%- if param_type == 'string' -%}
+        StringSerializer::serialize(body.{{ param_name }}, buffer);
+        {% else %}
+        Serializer<{{ param_type }}>::serialize(body.{{ param_name }}, buffer);
+        {%- endif -%}
+        {%- endfor -%}
+    }
+
+    // Deserialize Response{{req_name}}
+    bool deserialize(const std::vector<char>& buffer, size_t length) {
+        bool ret_code = true;
+        size_t offset = 0;
+        statusCode = Serializer<uint8_t>::deserialize(buffer, offset);
+        {% for param_name, param_type in returns %}
+        {%- if param_type == 'string' -%}
+        body.{{ param_name }} = StringSerializer::deserialize(buffer, offset, length);
+        {% else %}
+        body.{{ param_name }} = Serializer<{{param_type}}>::deserialize(buffer, offset);
+        {%- endif -%}
+        {%- endfor -%}
+        return ret_code;
+    }
+
+    {{req_name}}Res getResponseData( ) {
+        return body;
+    }
+
+    void setBodyResonpe( const {{req_name}}Res& res ){
+        this->body = res;
+    }
+};
+{% endfor %}
+
+#endif

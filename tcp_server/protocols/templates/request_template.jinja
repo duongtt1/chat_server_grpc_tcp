@@ -1,0 +1,73 @@
+#ifndef REQ_GENERATED_HPP
+#define REQ_ENERATED_HPP
+
+// Include library
+{% for lib in includes %}
+#include <{{ lib }}>
+{%- endfor %}
+{%- for f in files %}
+#include "{{ f }}"
+{%- endfor %}
+#include "request_handler.h"
+#include "types.h"
+{% for n in namespaces %}
+using namespace {{ n }};
+{%- endfor %}
+
+{%- for req_name, req_id, req_opcode, params, returns in requests %}
+class Request{{req_name}} : public RequestBase {
+protected:
+    {{req_name}}Body data;
+public:
+    Request{{req_name}}( ) : RequestBase({{req_id}}, {{req_opcode}}) {
+    }
+    ~Request{{req_name}}(){ }
+    // Serialize Request{{req_name}}
+    void serialize(std::vector<char>& buffer) const {
+        Serializer<uint16_t>::serialize(id, buffer);
+        Serializer<uint16_t>::serialize(opcode, buffer);
+        {% for param_name, param_type in params %}
+        {%- if param_type == 'string' -%}
+        StringSerializer::serialize(data.{{ param_name }}, buffer);
+        {% else %}
+        Serializer<{{ param_type }}>::serialize(data.{{ param_name }}, buffer);
+        {%- endif -%}
+        {%- endfor -%}
+    }
+
+    // Deserialize Request{{req_name}}
+    {{req_name}}Body deserialize(const std::vector<char>& buffer) {
+        size_t offset = 0;
+        id = Serializer<uint16_t>::deserialize(buffer, offset);
+        opcode = Serializer<uint16_t>::deserialize(buffer, offset);
+        {% for param_name, param_type in params %}
+        {%- if param_type == 'string' -%}
+        data.{{ param_name }} = StringSerializer::deserialize(buffer, offset);
+        {% else %}
+        data.{{ param_name }} = Serializer<{{ param_type }}>::deserialize(buffer, offset);
+        {%- endif -%}
+        {%- endfor -%}
+        return (data);
+    }
+
+    {{req_name}}Body getBody( ) {
+        return data;
+    }
+
+    void setBody( const {{req_name}}Body& body ){
+        this->data = body;
+    }
+
+    uint16_t getClientId()
+    {
+        return getID();
+    }
+
+    void callback( TCPSocket   *socket ) override {
+        this->data = this->deserialize(socket->inbound_data_);
+        RequestHandler::Request{{req_name}}CallbackIpml(socket, this->data);
+    }
+};
+{%- endfor %}
+
+#endif // PROTOCOL_GENERATED_HPP

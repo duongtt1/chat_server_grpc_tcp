@@ -1,0 +1,41 @@
+#ifndef TYPE_GENERATED_HPP
+#define TYPE_GENERATED_HPP
+
+// Include library
+{% for lib in includes %}
+#include <{{ lib }}>
+{%- endfor %}
+{%- for f in files %}
+#include "{{ f }}"
+{%- endfor %}
+#include "request_handler.h"
+{% for n in namespaces %}
+using namespace {{ n }};
+{%- endfor %}
+
+// Generated Enums
+{% for enum_name, enum_type, elements in enums %}
+enum class E_{{ enum_name }} : {{enum_type}} {
+    {%- for element_name, element_desc in elements %}
+    {{ element_name }} = {{ loop.index0 }},
+    {%- endfor %}
+};
+{% endfor %}
+
+{%- for req_name, req_id, req_opcode, params, returns in requests %}
+struct {{req_name}}Body
+{
+    {%- for param_name, param_type in params %}
+    {{ param_type }} {{ param_name }};
+    {%- endfor %}
+};
+
+struct {{req_name}}Res
+{
+    {%- for param_name, param_type in returns %}
+    {{ param_type }} {{ param_name }};
+    {%- endfor %}
+};
+{% endfor %}
+
+#endif // PROTOCOL_GENERATED_HPP
